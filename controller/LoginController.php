@@ -14,10 +14,16 @@ class LoginController {
 
         switch ($_SERVER['REQUEST_METHOD']) {
             case 'POST':
-                if ($this->login->login($data['user'], $data['password'])) {
-                    
+                $user = $this->login->login($data['user'], $data['password']);
+                if ($user !== false) {
+                    $_SESSION['role'] = $user['role'];
+                    $_SESSION['id'] = $user['id'];
+                    $_SESSION['user'] = $user['user'];
+                    $this->jsonResponse(true, "Logged in as: " . ucwords($user['user']) . " (". strtoupper($user['role']) .")");
+                    return;
                 } else {
-
+                    $this->jsonResponse(false, "Incorrect username or password.");
+                    return;
                 }
             default:
                 $this->methodNotAllowed();
