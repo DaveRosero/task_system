@@ -3,8 +3,7 @@ require_once 'conn.php';
 
 Class Register {
     private $conn;
-    public function __construct()
-    {
+    public function __construct() {
         $this->conn = database();
     }
 

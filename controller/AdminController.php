@@ -1,10 +1,10 @@
 <?php
-require_once '../model/login.php';
+require_once '../model/admin.php';
 
-class LoginController {
-    private $login;
+class AdminController {
+    private $admin;
     public function __construct() {
-        $this->login = new Login();
+        $this->admin = new Admin();
     }
 
     public function handleRequest() {
@@ -12,24 +12,17 @@ class LoginController {
         $data = json_decode(file_get_contents('php://input'), true);
 
         switch ($_SERVER['REQUEST_METHOD']) {
-            case 'POST':
-                $user = $data['user'] ?? "";
-                $password = $data['password'] ?? "";
-                if (empty($user) || empty($password)) {
-                    $this->jsonResponse(false, "All fields are required.");
-                    return;
-                }
+            case 'PATCH':
                 try {
-                    $row = $this->login->login($user, $password);
-                    if ($row !== false) {
-                        $_SESSION['role'] = $row['role'];
-                        $_SESSION['id'] = $row['id'];
-                        $_SESSION['user'] = $row['user'];
-                        $this->jsonResponse(true, "Logged in as: " . ucwords($row['user']) . " (". strtoupper($row['role']) .")");
-                        return;
-                    } else {
-                        $this->jsonResponse(false, "Incorrect username or password.");
-                        return;
+                    if ($data['user_status'] !== null) {
+                        $user = $this->admin->updateUserStatus($data['user'], $data['user_status']); // user and user_status should be a type hidden field when admin submits the form
+                        if ($user === true) {
+                            $this->jsonResponse(true, "Updated status of user: " . ucwords($data['user']));
+                            return;
+                        } else {
+                            $this->jsonResponse(false, "User does not exist.");
+                            return;
+                        }
                     }
                 } catch (PDOException $e) {
                     if (APP_DEBUG) {
@@ -40,6 +33,7 @@ class LoginController {
                         $this->jsonResponse(false, 'Internal Server Error');
                     }
                 }
+                break;
             default:
                 $this->methodNotAllowed();
                 break;
@@ -64,6 +58,6 @@ class LoginController {
     }
 }
 
-$controller = new LoginController();
+$controller = new AdminController();
 $controller->handleRequest();
 ?>
