@@ -3,13 +3,12 @@ require_once 'conn.php';
 
 class Login {
     private $conn;
-    public function __construct()
-    {
+    public function __construct() {
         $this->conn = database();
     }
 
     public function login($user, $password) {
-        $stmt = $this->conn->prepare("SELECT password, role, user, id FROM users WHERE user = :user LIMIT 1");
+        $stmt = $this->conn->prepare("SELECT password, role, user, id FROM users WHERE user = :user AND status = 1 LIMIT 1");
         $stmt->execute([
             'user' => $user
         ]);
