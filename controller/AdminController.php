@@ -12,6 +12,41 @@ class AdminController {
         $data = json_decode(file_get_contents('php://input'), true);
 
         switch ($_SERVER['REQUEST_METHOD']) {
+            case 'POST':
+                try {
+                    if ($data['task_name'] !== null) {
+                        $task = $data['task_name'];
+                        $description = $data['description'] ?? "";
+                        $assigned_to = $data['assigned_to'] ?? ""; // This should be an option field in the form
+
+                        if (empty($assigned_to)) {
+                            $this->jsonResponse(false, "All fields are required.");
+                            return;
+                        }
+
+                        $row = $this->admin->createTask($task, $description, $assigned_to);
+                        if (!empty($row)) {
+                            if ($row['task_exist'] === true) {
+                                $this->jsonResponse(false, 'This task assigned to ' . ucwords($row['assigned_to']) . " already exists.");
+                                return;
+                            }
+                            $this->jsonResponse(true, "New task created with ID: " . $row['task_id'] . "assigned to user: ". ucwords($row['assigned_to']));
+                            return;
+                        } else {
+                            $this->jsonResponse(false, "Something went wrong, please try again."); // return this error if somehow the user managed to select a superadmin for the task
+                            return;
+                        }
+                    }
+                } catch (PDOException $e) {
+                    if (APP_DEBUG) {
+                        $this->jsonResponse(false, $e->getMessage());
+                        return;
+                    } else { 
+                        error_log($e->getMessage());
+                        $this->jsonResponse(false, 'Internal Server Error');
+                    }
+                }
+                break;
             case 'PATCH':
                 try {
                     if ($data['user_status'] !== null) {
