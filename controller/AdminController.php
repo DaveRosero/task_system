@@ -49,7 +49,7 @@ class AdminController {
                 break;
             case 'PATCH':
                 try {
-                    if ($data['user_status'] !== null) {
+                    if (isset($data['user_status'])) {
                         $user = $this->admin->updateUserStatus($data['user'], $data['user_status']); // user and user_status should be a type hidden field when admin submits the form
                         if ($user === true) {
                             $this->jsonResponse(true, "Updated status of user: " . ucwords($data['user']));
@@ -59,9 +59,31 @@ class AdminController {
                             return;
                         }
                     }
+
+                    if (isset($data['task_id']) && isset($data['new_status'])) {
+                        $task = $this->admin->getTask($data['task_id']);
+                        if (empty($task)) {
+                            $this->jsonResponse(false, "This task does not exist.");
+                            return;
+                        }
+                        if ($this->admin->updateTaskStatus($data['task_id'], $data['new_status'])) {
+                            $this->jsonResponse(true, "The task has been updated.");
+                            return;
+                        } else {
+                            $row = $this->admin->getTask($data['task_id']);
+                            if ($row['status'] === 1) {
+                                $status = "Active.";
+                            } else {
+                                $status = "Inactive.";
+                            }
+                            $this->jsonResponse(false, "The task is already " . $status);
+                            return;
+                        }
+                    }
+                    return;
                 } catch (PDOException $e) {
                     if (APP_DEBUG) {
-                        $this->jsonResponse(false, $e->getMessage());
+                        $this->jsonResponse(false, $e->getMessage() . " " . $e->getFile() . " " . $e->getLine());
                         return;
                     } else { 
                         error_log($e->getMessage());

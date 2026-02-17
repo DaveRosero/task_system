@@ -45,6 +45,31 @@ class Admin {
         ]);
     }
 
+    public function updateTaskStatus($id, $new_status) {
+        $status = $this->getTaskStatus($id);
+        if ($status === $new_status) {
+            return false;
+        }
+        $stmt = $this->conn->prepare("UPDATE tasks SET status = :status WHERE id = :id LIMIT 1");
+        $stmt->execute([
+            'id' => $id,
+            'status' => $new_status
+        ]);
+        return true;
+    }
+
+    public function getTaskStatus($id) {
+        $stmt = $this->conn->prepare("SELECT status FROM tasks WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetchColumn();
+    }
+
+    public function getTask($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM tasks WHERE id = :id LIMIT 1");
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function userExists($user) {
         $stmt = $this->conn->prepare("SELECT 1 FROM users WHERE user = :user LIMIT 1");
         $stmt->execute(['user' => $user]);
