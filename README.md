@@ -9,9 +9,10 @@ A simple task management system utilizing user roles and hierarchy.
 
 ## Tech Stack
 - PHP (Vanilla)
+- phpMyAdmin
 - MySQL
 - PDO (Prepared Statements)
-- Apache (XAMPP)
+- Apache (XAMPP) / Laragon
 - Postman (API Testing)
 
 ## Architecture
@@ -20,4 +21,6 @@ A simple task management system utilizing user roles and hierarchy.
 - JSON
 
 ## What I learned
-- 
+- Creating Helpers for general-use functions
+- Handling PHP Sessions for account-handling
+- Using try-catch statements for error-handling
